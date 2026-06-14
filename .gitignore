@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+*.log
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build / cache
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Secrets
+**/credentials.json
+**/.env.local
+
+# Large / generated
+tradeSystem/backend/logs/
+tradeSystem/frontend/dist/

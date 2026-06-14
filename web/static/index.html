@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniQMT 量化工作台</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">Q</span>
+      <div>
+        <h1>MiniQMT 量化工作台</h1>
+        <p class="subtitle">数据同步 · 条件筛选 · 观察等待 · 可交易池</p>
+      </div>
+    </div>
+    <div class="status-pill" id="connStatus">
+      <span class="dot"></span>
+      <span>检测连接中…</span>
+    </div>
+  </header>
+
+  <nav class="steps">
+    <button class="step active" data-tab="sync">① 数据同步</button>
+    <button class="step" data-tab="filter">② 条件筛选</button>
+    <button class="step" data-tab="watch">③ 观察等待</button>
+    <button class="step" data-tab="pool">④ 股票池</button>
+  </nav>
+
+  <main>
+    <!-- Sync -->
+    <section id="tab-sync" class="panel active">
+      <div class="grid-2">
+        <div class="card">
+          <h2>全市场同步</h2>
+          <p class="hint">首次运行全量历史，之后每日增量更新。</p>
+          <label>起始日期 (YYYYMMDD)
+            <input id="syncStart" type="text" value="20200101" />
+          </label>
+          <div class="btn-row">
+            <button class="btn primary" id="btnFullSync">全量同步</button>
+            <button class="btn" id="btnIncrSync">增量同步</button>
+            <button class="btn ghost" id="btnUniverse">刷新标的数</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>同步进度</h2>
+          <div id="syncProgress" class="progress-box">
+            <p class="muted">暂无运行中的任务</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>全市场概览</h2>
+        <p id="universeInfo" class="stat">—</p>
+      </div>
+    </section>
+
+    <!-- Filter -->
+    <section id="tab-filter" class="panel">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <h2>筛选规则</h2>
+            <button class="btn sm" id="btnNewFilter">+ 自定义规则</button>
+          </div>
+          <div id="filterList" class="filter-list"></div>
+        </div>
+        <div class="card">
+          <h2>新建 / 编辑规则</h2>
+          <input id="filterName" type="text" placeholder="规则名称" />
+          <textarea id="filterExpr" rows="3" placeholder="表达式，如 amount > 2e8 and momentum_20d > 0"></textarea>
+          <input id="filterDesc" type="text" placeholder="说明（可选）" />
+          <div class="btn-row">
+            <button class="btn primary" id="btnSaveFilter">保存规则</button>
+            <button class="btn ghost" id="btnValidateExpr">校验表达式</button>
+          </div>
+          <p id="exprMsg" class="msg"></p>
+          <details class="fields-doc">
+            <summary>可用字段</summary>
+            <ul id="fieldDocs"></ul>
+          </details>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>筛选结果</h2>
+          <div class="btn-row">
+            <select id="screenSource">
+              <option value="universe">全市场</option>
+              <option value="node">按池节点</option>
+            </select>
+            <select id="screenNode" class="hidden"></select>
+            <button class="btn primary" id="btnRunScreen">运行筛选</button>
+            <button class="btn" id="btnAddWatch">加入观察池</button>
+          </div>
+        </div>
+        <p id="screenStat" class="stat">—</p>
+        <div class="table-wrap">
+          <table id="screenTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Watch -->
+    <section id="tab-watch" class="panel">
+      <div class="card">
+        <div class="card-head">
+          <h2>观察池</h2>
+          <button class="btn" id="btnRefreshWatch">刷新触发状态</button>
+        </div>
+        <div id="watchList" class="watch-grid"></div>
+      </div>
+    </section>
+
+    <!-- Pool -->
+    <section id="tab-pool" class="panel">
+      <div class="grid-2">
+        <div class="card">
+          <h2>池层级</h2>
+          <ul id="poolTree" class="tree"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h2 id="poolTitle">池明细</h2>
+            <button class="btn sm" id="btnPromote">调入可交易池</button>
+          </div>
+          <p id="poolStat" class="stat">选择左侧节点查看</p>
+          <div class="table-wrap">
+            <table id="poolTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
