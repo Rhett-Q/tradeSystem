@@ -119,12 +119,20 @@
     <!-- Qlib 因子 -->
     <div v-show="mode === 'qlib'" class="grid-2 screener-layout">
       <div class="card">
-        <h2>Qlib Alpha158 因子</h2>
+        <h2>Qlib 因子选股</h2>
         <p class="hint">
-          使用 Microsoft Qlib Alpha158 因子表达式，基于 PG 日 K 计算。默认排除退市标的。
+          基于 PG 日 K 计算 Qlib 因子表达式，默认排除退市标的。
           <span v-if="factorMeta.qlib_installed" class="tag">pyqlib 已安装</span>
           <span v-else class="tag">内嵌因子定义</span>
         </p>
+
+        <label>因子库
+          <select v-model="factorLibrary" @change="onLibraryChange">
+            <option v-for="lib in libraries" :key="lib.id" :value="lib.id">
+              {{ lib.label }} ({{ lib.factor_count }})
+            </option>
+          </select>
+        </label>
 
         <label>因子分类
           <select v-model="qlibForm.category" @change="onCategoryChange">
@@ -272,7 +280,15 @@
     <div v-show="mode === 'multi'" class="grid-2 screener-layout">
       <div class="card">
         <h2>多因子组合</h2>
-        <p class="hint">多个 Alpha158 因子取交集（AND），全部满足才命中。默认排除退市标的。</p>
+        <p class="hint">多个因子取交集（AND），全部满足才命中。默认排除退市标的。</p>
+
+        <label>因子库
+          <select v-model="factorLibrary" @change="onLibraryChange">
+            <option v-for="lib in libraries" :key="'m-' + lib.id" :value="lib.id">
+              {{ lib.label }} ({{ lib.factor_count }})
+            </option>
+          </select>
+        </label>
 
         <div class="nl-parse card-inset">
           <p class="cond-add-title">一句话描述策略</p>
@@ -688,6 +704,12 @@ const multiPresets = [
   },
 ]
 
+const factorLibrary = ref('alpha158')
+const libraries = ref([
+  { id: 'alpha158', label: 'Alpha158', factor_count: 158 },
+  { id: 'alpha360', label: 'Alpha360', factor_count: 360 },
+])
+
 const factorMeta = ref({
   categories: [],
   factors: [],
@@ -841,6 +863,7 @@ function buildQlibParams(page) {
     page: String(page),
     page_size: '50',
     factor: qlibForm.factor,
+    library: factorLibrary.value,
   }
   if (qlibForm.market) params.market = qlibForm.market
   if (qlibForm.sector) params.sector = qlibForm.sector
@@ -896,6 +919,7 @@ function buildMultiBody(page) {
   const body = {
     page,
     page_size: 50,
+    library: factorLibrary.value,
     conditions: multiForm.conditions.map((c) => ({
       factor: c.factor,
       ...(c.min_value != null && c.min_value !== '' ? { min_value: c.min_value } : {}),
@@ -1168,23 +1192,39 @@ async function loadSectors() {
   }
 }
 
+async function loadLibraries() {
+  try {
+    const data = await api.qlibLibraries()
+    if (data.libraries?.length) libraries.value = data.libraries
+  } catch {
+    /* keep defaults */
+  }
+}
+
 async function loadFactors() {
   try {
-    factorMeta.value = await api.screenerFactors()
+    factorMeta.value = await api.screenerFactors({ library: factorLibrary.value })
+    const defaultFactor = factorLibrary.value === 'alpha360' ? 'CLOSE5' : 'ROC20'
     if (!factorMeta.value.factors?.find((f) => f.name === qlibForm.factor)) {
-      qlibForm.factor = factorMeta.value.factors?.[0]?.name || 'ROC20'
+      qlibForm.factor = factorMeta.value.factors?.[0]?.name || defaultFactor
     }
     if (!factorMeta.value.factors?.find((f) => f.name === multiForm.pickerFactor)) {
-      multiForm.pickerFactor = factorMeta.value.factors?.[0]?.name || 'ROC20'
+      multiForm.pickerFactor = factorMeta.value.factors?.[0]?.name || defaultFactor
     }
   } catch {
     factorMeta.value = { categories: [], factors: [], total: 0 }
   }
 }
 
+async function onLibraryChange() {
+  qlibForm.category = ''
+  multiForm.category = ''
+  await loadFactors()
+}
+
 const HISTORY_MODE_LABELS = {
   basic: '基础',
-  qlib: 'Alpha158',
+  qlib: factorMeta.value.library_id === 'alpha360' ? 'Alpha360' : 'Alpha158',
   multi: '多因子',
 }
 
@@ -1327,7 +1367,7 @@ async function clearHistory() {
 }
 
 onMounted(async () => {
-  await Promise.all([loadSectors(), loadFactors(), loadHistory()])
+  await Promise.all([loadSectors(), loadLibraries(), loadFactors(), loadHistory()])
 })
 </script>
 

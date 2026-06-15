@@ -142,8 +142,9 @@ const SCREENER_NAV_GROUP = {
   icon: '🔍',
   children: [
     { path: '/screener/basic', title: '基础筛选' },
-    { path: '/screener/qlib', title: 'Qlib Alpha158' },
+    { path: '/screener/qlib', title: 'Qlib 因子' },
     { path: '/screener/multi', title: '多因子选股' },
+    { path: '/qlib/analysis', title: '因子分析 / ML' },
   ],
 }
 
@@ -200,8 +201,9 @@ const subtitles = {
   '/symbols': '全市场标的列表与筛选',
   '/market': '按代码查询历史 K 线',
   '/screener/basic': '基于 PostgreSQL 日 K 与标的元数据筛选',
-  '/screener/qlib': 'Qlib Alpha158 单因子选股',
-  '/screener/multi': '多个 Alpha158 因子取交集（AND）',
+  '/screener/qlib': 'Qlib Alpha158/360 单因子选股',
+  '/screener/multi': '多个 Qlib 因子取交集（AND）',
+  '/qlib/analysis': '因子 IC 分析、LightGBM 训练与预测选股',
   '/tasks': '同步任务队列与执行日志',
   '/database': 'PostgreSQL 表结构与存储统计',
   '/quality': 'K 线完整性、异常值与同步问题统计',

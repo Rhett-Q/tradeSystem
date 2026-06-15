@@ -258,13 +258,31 @@ def _family_key(name: str) -> str:
     return prefix
 
 
+_ALPHA360_SERIES_HELP: dict[str, str] = {
+    "CLOSE": "Alpha360 收盘价序列：{n} 日前收盘相对最新收盘（CLOSE0=1）。",
+    "OPEN": "Alpha360 开盘价序列：{n} 日前开盘相对最新收盘。",
+    "HIGH": "Alpha360 最高价序列：{n} 日前最高相对最新收盘。",
+    "LOW": "Alpha360 最低价序列：{n} 日前最低相对最新收盘。",
+    "VWAP": "Alpha360 VWAP 序列：{n} 日前均价相对最新收盘。",
+    "VOLUME": "Alpha360 成交量序列：{n} 日前成交量相对最新成交量（VOLUME0=1）。",
+}
+
+
 def get_factor_info(name: str, expression: str = "", category: str = "") -> dict[str, Any]:
     """返回单个因子的解释与用法。"""
     family = _family_key(name)
     meta = _FAMILY_META.get(family) or _FAMILY_META.get(name, {})
     window = _parse_window(name)
 
-    description = meta.get("description", f"Alpha158 因子 {name}。")
+    if family in _ALPHA360_SERIES_HELP and window is not None:
+        description = _ALPHA360_SERIES_HELP[family].format(n=window)
+        meta = {
+            "description": description,
+            "usage": "Alpha360 原始价量序列，通常用于 ML 模型输入；单因子筛选需结合业务设定阈值。",
+            "value_hint": "已相对最新价/量归一化；CLOSE0、VOLUME0 恒为 1。",
+        }
+    else:
+        description = meta.get("description", f"Alpha158 因子 {name}。")
     if window is not None and "{n}" not in description.lower():
         description = description.replace("N 日", f"{window} 日").replace("N日", f"{window}日")
 
@@ -293,12 +311,14 @@ def get_factor_info(name: str, expression: str = "", category: str = "") -> dict
     }
 
 
-def enrich_factor(factor: dict[str, str]) -> dict[str, Any]:
+def enrich_factor(factor: dict[str, str], library: str = "") -> dict[str, Any]:
     info = get_factor_info(
         factor["name"],
         factor.get("expression", ""),
         factor.get("category", ""),
     )
+    if library:
+        info["library_id"] = library
     return {**factor, **info}
 
 

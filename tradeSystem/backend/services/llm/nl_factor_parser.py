@@ -19,7 +19,9 @@ _VALID_FACTORS: set[str] | None = None
 def _factor_names() -> set[str]:
     global _VALID_FACTORS
     if _VALID_FACTORS is None:
-        _VALID_FACTORS = {f["name"] for f in list_factor_catalog()["factors"]}
+        from services.qlib.catalog import list_factor_names
+
+        _VALID_FACTORS = set(list_factor_names())
     return _VALID_FACTORS
 
 

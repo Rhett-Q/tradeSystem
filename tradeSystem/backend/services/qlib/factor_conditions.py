@@ -6,7 +6,7 @@ from services.qlib.catalog import get_factor_expression
 from services.qlib.factor_meta import get_factor_info
 
 
-def parse_factor_conditions(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def parse_factor_conditions(raw: list[dict[str, Any]], library: str = "") -> list[dict[str, Any]]:
     if not raw:
         raise ValueError("至少需要一个因子条件")
     if len(raw) > 10:
@@ -22,7 +22,7 @@ def parse_factor_conditions(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
             raise ValueError(f"因子 {name} 重复，请合并阈值")
         seen.add(name)
 
-        expr = get_factor_expression(name)
+        expr = get_factor_expression(name, library)
         if not expr:
             raise ValueError(f"未知因子: {name}")
 

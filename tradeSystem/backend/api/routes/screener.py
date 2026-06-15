@@ -39,6 +39,7 @@ class MultiScreenRequest(BaseModel):
     page_size: int = Field(50, ge=1, le=200)
     sort: list[SortRule] = Field(default_factory=list, description="多字段排序，优先级从上到下")
     sort_by: str = Field("", description="兼容旧版：单因子降序")
+    library: str = Field("alpha158", description="alpha158 / alpha360")
 
 
 class NlParseRequest(BaseModel):
@@ -126,32 +127,43 @@ def run_screen(
 @router.get("/factors")
 def list_factors(
     category: str = Query("", description="kbar / momentum / trend / volume …"),
+    library: str = Query("alpha158", description="alpha158 / alpha360"),
     _: None = Depends(require_db),
 ) -> dict[str, Any]:
-    return list_factor_catalog(category.strip())
+    try:
+        return list_factor_catalog(category.strip(), library=library)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.get("/factors/{name}")
 def get_factor_detail(
     name: str,
+    library: str = Query("", description="alpha158 / alpha360，空则自动匹配"),
     _: None = Depends(require_db),
 ) -> dict[str, Any]:
-    expr = get_factor_expression(name.strip())
+    from services.qlib.catalog import _guess_category, resolve_factor_library
+
+    lib = resolve_factor_library(name.strip(), library)
+    if not lib:
+        raise HTTPException(404, f"未知因子: {name}")
+    expr = get_factor_expression(name.strip(), lib)
     if not expr:
         raise HTTPException(404, f"未知因子: {name}")
-    from services.qlib.catalog import _guess_category
-
-    cat = _guess_category(name.strip())
-    return get_factor_info(name.strip(), expr, cat)
+    cat = _guess_category(name.strip(), lib)
+    info = get_factor_info(name.strip(), expr, cat)
+    info["library_id"] = lib
+    return info
 
 
 @router.get("/qlib-run")
 def run_qlib_screen_api(
-    factor: str = Query(..., description="Alpha158 因子名，如 ROC20、MA5"),
+    factor: str = Query(..., description="因子名，如 ROC20、CLOSE5"),
     min_value: float | None = None,
     max_value: float | None = None,
     market: str = Query(""),
     sector: str = Query(""),
+    library: str = Query("alpha158", description="alpha158 / alpha360"),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     _: None = Depends(require_db),
@@ -164,6 +176,7 @@ def run_qlib_screen_api(
         "max_value": max_value,
         "market": market.strip(),
         "sector": sector.strip(),
+        "library": library.strip(),
         "page_size": page_size,
     }
     try:
@@ -175,6 +188,7 @@ def run_qlib_screen_api(
             sector=query["sector"],
             page=page,
             page_size=page_size,
+            library=query["library"],
         )
         history = save_screen_history(mode="qlib", query=query, result=result, page=page)
         if history:
@@ -194,6 +208,7 @@ def run_multi_screen_api(
             "conditions": [c.model_dump(exclude_none=True) for c in body.conditions],
             "market": body.market.strip(),
             "sector": body.sector.strip(),
+            "library": body.library.strip(),
             "sort": [s.model_dump() for s in body.sort],
             "sort_by": body.sort_by.strip(),
             "page_size": body.page_size,
@@ -206,6 +221,7 @@ def run_multi_screen_api(
             page_size=body.page_size,
             sort=query["sort"],
             sort_by=query["sort_by"],
+            library=query["library"],
         )
         history = save_screen_history(mode="multi", query=query, result=result, page=body.page)
         if history:

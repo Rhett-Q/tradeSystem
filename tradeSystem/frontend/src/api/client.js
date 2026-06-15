@@ -13,7 +13,13 @@ async function request(path, options = {}) {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || res.statusText || `HTTP ${res.status}`)
+      const detail = err.detail
+      if (detail && typeof detail === 'object') {
+        const e = new Error(detail.message || '请求失败')
+        e.detail = detail
+        throw e
+      }
+      throw new Error(typeof detail === 'string' ? detail : res.statusText || `HTTP ${res.status}`)
     }
     return res.json()
   } catch (e) {
@@ -70,6 +76,20 @@ export const api = {
   screenerHistoryDelete: (id) =>
     request(`/api/screener/history/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   screenerHistoryClear: () => request('/api/screener/history', { method: 'DELETE' }),
+  qlibLibraries: () => request('/api/qlib/libraries'),
+  qlibFactors: (params = {}) => {
+    const q = new URLSearchParams(params).toString()
+    return request(`/api/qlib/factors${q ? `?${q}` : ''}`)
+  },
+  qlibFactorIc: (params) => {
+    const q = new URLSearchParams(params).toString()
+    return request(`/api/qlib/factor-ic?${q}`, { timeoutMs: 300_000 })
+  },
+  qlibModels: () => request('/api/qlib/models'),
+  qlibTrain: (body) =>
+    request('/api/qlib/train', { method: 'POST', body: JSON.stringify(body), timeoutMs: 600_000 }),
+  qlibPredict: (body) =>
+    request('/api/qlib/predict', { method: 'POST', body: JSON.stringify(body), timeoutMs: 300_000 }),
   kline: (params) => {
     const q = new URLSearchParams(params).toString()
     return request(`/api/market/kline?${q}`)

@@ -19,7 +19,7 @@ _WORKSPACE = _BACKEND.parents[2]
 if str(_WORKSPACE) not in sys.path:
     sys.path.insert(0, str(_WORKSPACE))
 
-from api.routes import backtest, data_quality, database, health, market_data, screener, strategy, symbols, sync  # noqa: E402
+from api.routes import backtest, data_quality, database, health, market_data, qlib, screener, strategy, symbols, sync  # noqa: E402
 from config.settings import get_settings  # noqa: E402
 from db import connection as db_conn  # noqa: E402
 from db.repositories import settings_repo  # noqa: E402
@@ -72,6 +72,7 @@ app.include_router(health.router)
 app.include_router(sync.router)
 app.include_router(symbols.router)
 app.include_router(screener.router)
+app.include_router(qlib.router)
 app.include_router(market_data.router)
 app.include_router(database.router)
 app.include_router(data_quality.router)

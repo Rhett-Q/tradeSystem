@@ -40,13 +40,19 @@ const routes = [
     path: '/screener/qlib',
     name: 'ScreenerQlib',
     component: () => import('@/views/ScreenerView.vue'),
-    meta: { title: 'Qlib Alpha158', icon: '🔍', screenerMode: 'qlib', navGroup: 'screener' },
+    meta: { title: 'Qlib 因子', icon: '🔍', screenerMode: 'qlib', navGroup: 'screener' },
   },
   {
     path: '/screener/multi',
     name: 'ScreenerMulti',
     component: () => import('@/views/ScreenerView.vue'),
     meta: { title: '多因子选股', icon: '🔍', screenerMode: 'multi', navGroup: 'screener' },
+  },
+  {
+    path: '/qlib/analysis',
+    name: 'FactorAnalysis',
+    component: () => import('@/views/FactorAnalysisView.vue'),
+    meta: { title: '因子分析', icon: '📐' },
   },
   {
     path: '/tasks',

@@ -93,10 +93,12 @@ def _qlib_cache_key(
     max_value: float | None = None,
     market: str = "",
     sector: str = "",
+    library: str = "",
 ) -> str:
     payload: dict[str, Any] = {
         "market": market,
         "sector": sector,
+        "library": library,
     }
     if conditions is not None:
         payload["conditions"] = conditions
@@ -161,8 +163,8 @@ def _load_symbol_meta(
         return {r["symbol"]: dict(r) for r in cur.fetchall()}
 
 
-def _parse_conditions(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return parse_factor_conditions(raw)
+def _parse_conditions(raw: list[dict[str, Any]], library: str = "") -> list[dict[str, Any]]:
+    return parse_factor_conditions(raw, library=library)
 
 
 def _passes_threshold(val: float | None, min_value: float | None, max_value: float | None) -> bool:
@@ -238,9 +240,10 @@ def run_multi_qlib_screen(
     page_size: int = 50,
     sort: list[dict[str, Any]] | None = None,
     sort_by: str = "",
+    library: str = "",
 ) -> dict[str, Any]:
     log = ScreenLogger("multi")
-    parsed = _parse_conditions(conditions)
+    parsed = _parse_conditions(conditions, library=library)
     factor_names = [c["factor"] for c in parsed]
     sort_rules = _parse_sort_rules(sort, sort_by, factor_names)
 
@@ -263,7 +266,7 @@ def run_multi_qlib_screen(
             "max_value": c["max_value"],
         }
         for c in parsed
-    ], market=market, sector=sector)
+    ], market=market, sector=sector, library=library)
     cached_hits = _get_cached_hits(cache_key)
 
     if cached_hits is not None:
@@ -367,15 +370,16 @@ def run_qlib_screen(
     sector: str = "",
     page: int = 1,
     page_size: int = 50,
+    library: str = "",
 ) -> dict[str, Any]:
     log = ScreenLogger("qlib")
     log.info(f"开始 Qlib 因子筛选 · {factor}")
-    log.info(f"条件 · {EXCLUDE_DELISTED_LABEL}")
 
-    expr = get_factor_expression(factor)
+    expr = get_factor_expression(factor, library)
     if not expr:
         raise ValueError(f"未知因子: {factor}")
 
+    log.info(f"条件 · {EXCLUDE_DELISTED_LABEL}")
     factor_info = get_factor_info(factor, expr)
     log.info(f"表达式 · {expr}")
     log.info(f"含义 · {factor_info['description']}")
@@ -396,6 +400,7 @@ def run_qlib_screen(
         max_value=max_value,
         market=market,
         sector=sector,
+        library=library,
     )
     cached_hits = _get_cached_hits(cache_key)
 

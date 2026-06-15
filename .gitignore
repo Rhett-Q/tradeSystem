@@ -32,3 +32,5 @@ Thumbs.db
 # Large / generated
 tradeSystem/backend/logs/
 tradeSystem/frontend/dist/
+tradeSystem/backend/data/models/*.joblib
+tradeSystem/backend/data/models/*.meta.json
