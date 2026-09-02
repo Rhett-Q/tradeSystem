@@ -34,3 +34,21 @@ tradeSystem/backend/logs/
 tradeSystem/frontend/dist/
 tradeSystem/backend/data/models/*.joblib
 tradeSystem/backend/data/models/*.meta.json
+tradeSystem/backend/data/predictions/*.json
+tradeSystem/rdagent/.venv/
+tradeSystem/rdagent/.env
+tradeSystem/rdagent/workspace/
+tradeSystem/data/qlib_export/csv/
+tradeSystem/data/qlib_cn/
+
+# RD-Agent Academy
+tradeSystem/rdagent_academy/backend/.venv/
+tradeSystem/rdagent_academy/frontend/node_modules/
+tradeSystem/rdagent_academy/frontend/dist/
+tradeSystem/rdagent/log/
+tradeSystem/rdagent/git_ignore_folder/
+tradeSystem/rdagent/mlruns/
+tradeSystem/rdagent/session_status.json
+tradeSystem/rdagent/feasibility_status.json
+tradeSystem/rdagent/selector.log
+

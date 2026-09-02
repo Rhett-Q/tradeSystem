@@ -1,0 +1,82 @@
+{
+  "title": "RD-Agent Academy",
+  "subtitle": "微软 RD-Agent × TradeSystem 新手学习路径",
+  "pipeline": [
+    { "id": "idea", "label": "提假设", "desc": "LLM 提出可检验的因子假设" },
+    { "id": "code", "label": "写代码", "desc": "生成可运行的因子实现" },
+    { "id": "run", "label": "回测", "desc": "在 Qlib Docker 中跑量化回测" },
+    { "id": "feedback", "label": "反馈", "desc": "根据 IC/收益决定采纳或迭代" }
+  ],
+  "tracks": [
+    {
+      "id": "foundations",
+      "title": "基础概念",
+      "summary": "弄清 RD-Agent 是什么、和 TradeSystem 生产轨的关系",
+      "lessons": [
+        {
+          "id": "what-is-rdagent",
+          "title": "RD-Agent 是什么",
+          "minutes": 8,
+          "level": "入门",
+          "lab_action": null
+        },
+        {
+          "id": "two-tracks",
+          "title": "生产轨 vs 研究轨",
+          "minutes": 6,
+          "level": "入门",
+          "lab_action": null
+        },
+        {
+          "id": "fin-factor-loop",
+          "title": "fin_factor 四步循环",
+          "minutes": 10,
+          "level": "入门",
+          "lab_action": null
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "环境就绪",
+      "summary": "把本机检查项全部变绿，再开始烧 LLM 额度",
+      "lessons": [
+        {
+          "id": "env-checklist",
+          "title": "环境检查清单",
+          "minutes": 12,
+          "level": "实操",
+          "lab_action": "health"
+        },
+        {
+          "id": "data-sources",
+          "title": "回测数据从哪来",
+          "minutes": 10,
+          "level": "实操",
+          "lab_action": "data"
+        }
+      ]
+    },
+    {
+      "id": "first-run",
+      "title": "第一次跑通",
+      "summary": "限制轮数试跑、看日志、读反馈、用官方 UI 看图",
+      "lessons": [
+        {
+          "id": "run-fin-factor",
+          "title": "启动与恢复 fin_factor",
+          "minutes": 15,
+          "level": "实操",
+          "lab_action": "run"
+        },
+        {
+          "id": "read-sessions",
+          "title": "读懂 Session 与反馈",
+          "minutes": 12,
+          "level": "实操",
+          "lab_action": "sessions"
+        }
+      ]
+    }
+  ]
+}
